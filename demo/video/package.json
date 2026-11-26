@@ -1,0 +1,27 @@
+{
+  "name": "driftcatch-demo-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Launch demo video for DriftCatch, built with Remotion.",
+  "scripts": {
+    "studio": "remotion studio",
+    "build": "remotion render Launch out/driftcatch-launch.mp4",
+    "build:short": "remotion render Short out/driftcatch-short.mp4",
+    "build:vertical": "remotion render Vertical out/driftcatch-vertical.mp4",
+    "build:gif": "remotion render DriftCatchGif out/driftcatch-drift.gif --codec=gif --every-nth-frame=2"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.429",
+    "@remotion/google-fonts": "4.0.429",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.429"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  },
+  "allowScripts": {
+    "esbuild@0.25.0": true
+  }
+}

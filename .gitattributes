@@ -1,0 +1,6 @@
+# Normalise line endings so a recording diff is legible on every platform.
+* text=auto eol=lf
+
+# Recordings are the artefact this project exists to diff. Keep them text, and
+# never let a CRLF rewrite look like a behaviour change.
+*.json text eol=lf

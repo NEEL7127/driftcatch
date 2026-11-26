@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# DriftCatch
+*.json.tmp
+
+# Frontend (UI, later phase)
+node_modules/
+driftcatch/ui/static/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary testing environment - never committed, may contain credentials
+_testbed/
+
+# Credentials - belt and braces alongside _testbed/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Demo render output and the Remotion toolchain
+# assets/ holds the committed copies that the README links to
+demo/out/
+demo/video/out/
+demo/video/node_modules/
+demo/sandbox/

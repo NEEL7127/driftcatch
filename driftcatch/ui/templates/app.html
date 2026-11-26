@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DriftCatch</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>tailwind.config = { darkMode: 'class' }</script>
+<style>
+  :root { color-scheme: dark; }
+  body { background:#0e1016; color:#e9ebf0; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .mono { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .card { background:#171a22; border:1px solid #2a2f3b; border-radius:10px; }
+  .pill { font-size:11px; padding:2px 8px; border-radius:999px; font-weight:600; }
+  .st-approved { background:#163024; color:#5fc593; }
+  .st-pending  { background:#2d2611; color:#e0b45a; }
+  .st-stale    { background:#2e2715; color:#e0a94a; }
+  .st-rejected { background:#2e1a1a; color:#e78a8a; }
+  .tab { padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; }
+  .tab-on { background:#20273f; color:#9ab0ff; }
+  .row:hover { background:#1f232d; }
+  pre { white-space:pre-wrap; word-break:break-word; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<header class="border-b border-[#2a2f3b] px-6 py-4 flex items-center gap-4 flex-wrap">
+  <div>
+    <h1 class="text-lg font-semibold tracking-tight">DriftCatch</h1>
+    <p class="text-xs text-[#858c9a]">catch the moment your agent's behaviour changes</p>
+  </div>
+  <nav class="flex gap-1 ml-auto flex-wrap">
+    <div class="tab tab-on" data-tab="dashboard">Dashboard</div>
+    <div class="tab" data-tab="recordings">Recordings</div>
+    <div class="tab" data-tab="coverage">Coverage</div>
+    <div class="tab" data-tab="compare">Compare</div>
+    <div class="tab" data-tab="config">Config</div>
+  </nav>
+</header>
+
+<main class="p-6 max-w-6xl mx-auto">
+  <div id="error" class="hidden card border-[#b23b3b] p-3 mb-4 text-sm text-[#e78a8a]"></div>
+
+  <!-- Dashboard -->
+  <section id="dashboard">
+    <div class="grid gap-4 md:grid-cols-4 mb-6">
+      <div class="card p-4"><div class="text-xs text-[#858c9a]">Behaviour coverage</div>
+        <div id="cov-pct" class="text-3xl font-semibold mt-1">–</div>
+        <div id="cov-sub" class="text-xs text-[#858c9a] mt-1"></div></div>
+      <div class="card p-4"><div class="text-xs text-[#858c9a]">Approved</div>
+        <div id="c-approved" class="text-3xl font-semibold mt-1 text-[#5fc593]">–</div></div>
+      <div class="card p-4"><div class="text-xs text-[#858c9a]">Pending approval</div>
+        <div id="c-pending" class="text-3xl font-semibold mt-1 text-[#e0b45a]">–</div></div>
+      <div class="card p-4"><div class="text-xs text-[#858c9a]">Stale</div>
+        <div id="c-stale" class="text-3xl font-semibold mt-1 text-[#e0a94a]">–</div></div>
+    </div>
+    <div class="card p-4">
+      <h2 class="font-semibold mb-2 text-sm">Untested behaviours</h2>
+      <ul id="uncovered" class="text-sm text-[#b2b8c4] space-y-1"></ul>
+    </div>
+    <p id="dir" class="text-xs text-[#858c9a] mt-4 mono"></p>
+  </section>
+
+  <!-- Recordings -->
+  <section id="recordings" class="hidden">
+    <div class="grid gap-4 md:grid-cols-[320px_1fr]">
+      <div class="card overflow-hidden">
+        <div class="px-3 py-2 text-xs text-[#858c9a] border-b border-[#2a2f3b]">Recordings</div>
+        <div id="rec-list" class="max-h-[70vh] overflow-y-auto"></div>
+      </div>
+      <div id="rec-detail" class="card p-4 text-sm text-[#858c9a]">Select a recording.</div>
+    </div>
+  </section>
+
+  <!-- Coverage -->
+  <section id="coverage" class="hidden">
+    <div class="card p-4">
+      <table class="w-full text-sm">
+        <thead class="text-xs text-[#858c9a] text-left">
+          <tr><th class="py-2">Tool</th><th>Called</th><th>Calls</th><th>Error path</th></tr>
+        </thead>
+        <tbody id="cov-rows"></tbody>
+      </table>
+    </div>
+    <div class="card p-4 mt-4">
+      <h2 class="font-semibold mb-2 text-sm">Decision paths</h2>
+      <ul id="cov-paths" class="text-sm text-[#b2b8c4] space-y-1 mono"></ul>
+    </div>
+  </section>
+
+  <!-- Compare -->
+  <section id="compare" class="hidden">
+    <div class="card p-4 mb-4 flex gap-2 items-end flex-wrap">
+      <label class="text-xs text-[#858c9a]">Golden<br>
+        <select id="cmp-a" class="mt-1 bg-[#0e1016] border border-[#2a2f3b] rounded px-2 py-1 text-sm"></select></label>
+      <label class="text-xs text-[#858c9a]">Candidate<br>
+        <select id="cmp-b" class="mt-1 bg-[#0e1016] border border-[#2a2f3b] rounded px-2 py-1 text-sm"></select></label>
+      <button id="cmp-go" class="bg-[#3251d4] hover:bg-[#2a45b8] px-3 py-1.5 rounded text-sm">Compare</button>
+    </div>
+    <div id="cmp-out" class="card p-4 text-sm text-[#858c9a]">Pick two recordings.</div>
+  </section>
+
+  <!-- Config -->
+  <section id="config" class="hidden">
+    <div class="card p-4">
+      <p class="text-xs text-[#858c9a] mb-3">
+        Safety settings (redaction, approval gating) are intentionally not editable here.
+      </p>
+      <div id="cfg-fields" class="space-y-3 text-sm"></div>
+      <button id="cfg-save" class="mt-4 bg-[#3251d4] hover:bg-[#2a45b8] px-3 py-1.5 rounded text-sm">
+        Save to driftcatch.toml
+      </button>
+      <p id="cfg-msg" class="text-xs mt-2 text-[#858c9a]"></p>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.innerHTML = h; return e; };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function api(path, opts) {
+  const res = await fetch(path, opts);
+  if (!res.ok) {
+    let detail = res.statusText;
+    try { detail = (await res.json()).detail || detail; } catch (e) {}
+    throw new Error(detail);
+  }
+  return res.json();
+}
+function fail(e) { const b = $('#error'); b.textContent = e.message || String(e); b.classList.remove('hidden'); }
+function clearFail() { $('#error').classList.add('hidden'); }
+
+// ---- tabs
+document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach((x) => x.classList.remove('tab-on'));
+  t.classList.add('tab-on');
+  ['dashboard','recordings','coverage','compare','config'].forEach((id) => {
+    $('#' + id).classList.toggle('hidden', id !== t.dataset.tab);
+  });
+  load(t.dataset.tab);
+}));
+
+// ---- dashboard
+async function loadDashboard() {
+  const s = await api('/api/summary');
+  $('#cov-pct').textContent = s.coverage.percent.toFixed(1) + '%';
+  $('#cov-sub').textContent = `${s.coverage.covered_units}/${s.coverage.total_units} behaviour units`;
+  $('#c-approved').textContent = s.counts.approved;
+  $('#c-pending').textContent = s.counts.pending;
+  $('#c-stale').textContent = s.counts.stale;
+  $('#dir').textContent = s.recordings_dir;
+  const ul = $('#uncovered'); ul.innerHTML = '';
+  if (!s.coverage.uncovered.length) ul.append(el('li', 'text-[#5fc593]', 'Every declared behaviour has coverage.'));
+  s.coverage.uncovered.forEach((u) => ul.append(el('li', '', '&bull; ' + esc(u))));
+}
+
+// ---- recordings
+async function loadRecordings() {
+  const list = await api('/api/recordings');
+  const box = $('#rec-list'); box.innerHTML = '';
+  if (!list.length) { box.append(el('div', 'p-3 text-sm text-[#858c9a]', 'No recordings yet.')); return; }
+  list.forEach((r) => {
+    const row = el('div', 'row px-3 py-2 cursor-pointer border-b border-[#2a2f3b]');
+    row.innerHTML = `<div class="flex items-center gap-2">
+        <span class="text-sm">${esc(r.name)}</span>
+        <span class="pill st-${r.status} ml-auto">${r.status}</span></div>
+      <div class="text-xs text-[#858c9a] mono mt-0.5">${esc(r.trajectory.join(' → ')) || '—'}</div>`;
+    row.addEventListener('click', () => showRecording(r.name));
+    box.append(row);
+  });
+}
+
+async function showRecording(name) {
+  clearFail();
+  const d = await api('/api/recordings/' + encodeURIComponent(name));
+  const box = $('#rec-detail');
+  const steps = d.trajectory.join(' → ') || '(no tools)';
+  let html = `<div class="flex items-center gap-2 flex-wrap mb-3">
+      <h2 class="font-semibold">${esc(d.name)}</h2>
+      <span class="pill st-${d.status}">${d.status}</span>
+      <div class="ml-auto flex gap-2">
+        <button id="ap" class="bg-[#1f7a4d] hover:bg-[#19633e] px-3 py-1 rounded text-xs">Approve</button>
+        <button id="rj" class="bg-[#b23b3b] hover:bg-[#8f2f2f] px-3 py-1 rounded text-xs">Reject</button>
+      </div></div>
+    <div class="mono text-sm mb-3 text-[#9ab0ff]">${esc(steps)}</div>
+    <div class="text-xs text-[#858c9a] mb-4">
+      ${d.events} events &middot; ${d.tokens} tokens &middot; approved by ${esc(d.approved_by || '—')}
+      ${d.redacted ? ' &middot; ' + d.redacted + ' field(s) redacted' : ''}
+    </div>`;
+
+  if (d.secrets && d.secrets.length) {
+    html += `<div class="card border-[#b23b3b] p-2 mb-3 text-xs text-[#e78a8a]">
+      Credential-shaped values found at: ${esc(d.secrets.join(', '))}</div>`;
+  }
+
+  html += '<div class="space-y-2">';
+  d.events_detail.forEach((e) => {
+    if (e.type === 'llm') {
+      const msgs = (e.messages || []).map((m) =>
+        `<div class="text-xs"><span class="text-[#858c9a] mono">${esc(m.role || '?')}</span> ${esc(String(m.content ?? '').slice(0, 300))}</div>`
+      ).join('');
+      html += `<div class="card p-3">
+        <div class="text-xs mono text-[#9ab0ff]">#${e.index} llm &middot; ${esc(e.model)} &middot; key ${esc(e.match_key)}${e.streamed ? ' &middot; streamed' : ''}</div>
+        <div class="mt-2 space-y-1">${msgs}</div>
+        ${e.decided.length ? `<div class="text-xs mt-2">decided: <span class="mono text-[#e0a94a]">${esc(e.decided.join(', '))}</span></div>` : ''}
+        ${e.content ? `<div class="text-xs mt-2 text-[#b2b8c4]">${esc(e.content.slice(0, 300))}</div>` : ''}
+        ${e.error ? `<div class="text-xs mt-2 text-[#e78a8a]">${esc(e.error.type)}: ${esc(e.error.message)}</div>` : ''}
+      </div>`;
+    } else {
+      html += `<div class="card p-3">
+        <div class="text-xs mono ${e.error ? 'text-[#e78a8a]' : 'text-[#5fc593]'}">#${e.index} tool &middot; ${esc(e.name)} &middot; ${e.error ? 'error' : 'ok'}</div>
+        <div class="text-xs mt-1 mono text-[#858c9a]">args ${esc(JSON.stringify(e.args))}</div>
+        ${e.error
+          ? `<div class="text-xs mt-1 text-[#e78a8a]">${esc(e.error.type)}: ${esc(e.error.message)}</div>`
+          : `<div class="text-xs mt-1 mono text-[#b2b8c4]">${esc(JSON.stringify(e.result).slice(0, 300))}</div>`}
+      </div>`;
+    }
+  });
+  html += '</div>';
+  box.innerHTML = html;
+
+  $('#ap').addEventListener('click', async () => {
+    try { await api(`/api/recordings/${encodeURIComponent(name)}/approve`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({by: 'ui'})});
+      await loadRecordings(); await showRecording(name); clearFail();
+    } catch (e) { fail(e); }
+  });
+  $('#rj').addEventListener('click', async () => {
+    try { await api(`/api/recordings/${encodeURIComponent(name)}/reject`, {method: 'POST'});
+      await loadRecordings(); await showRecording(name); clearFail();
+    } catch (e) { fail(e); }
+  });
+}
+
+// ---- coverage
+async function loadCoverage() {
+  const c = await api('/api/coverage');
+  const tb = $('#cov-rows'); tb.innerHTML = '';
+  Object.keys(c.tools).sort().forEach((k) => {
+    const t = c.tools[k];
+    tb.append(el('tr', 'border-t border-[#2a2f3b]', `
+      <td class="py-2 mono text-sm">${esc(t.name)}</td>
+      <td class="${t.covered ? 'text-[#5fc593]' : 'text-[#e78a8a]'}">${t.covered ? 'yes' : 'NO'}</td>
+      <td class="text-[#b2b8c4]">${t.calls}</td>
+      <td class="${t.error_path_covered ? 'text-[#5fc593]' : 'text-[#e78a8a]'}">${t.error_path_covered ? 'yes' : 'NO'}</td>`));
+  });
+  const ul = $('#cov-paths'); ul.innerHTML = '';
+  c.paths.forEach((p) => ul.append(el('li', '', `${p.recordings}x &nbsp; ${esc(p.path)}`)));
+}
+
+// ---- compare
+async function loadCompare() {
+  const list = await api('/api/recordings');
+  ['#cmp-a', '#cmp-b'].forEach((sel) => {
+    const s = $(sel); s.innerHTML = '';
+    list.forEach((r) => s.append(el('option', '', esc(r.name))));
+  });
+}
+$('#cmp-go').addEventListener('click', async () => {
+  try {
+    const a = $('#cmp-a').value, b = $('#cmp-b').value;
+    const r = await api(`/api/compare?golden=${encodeURIComponent(a)}&candidate=${encodeURIComponent(b)}`);
+    const at = r.attribution;
+    let html = `<div class="mono text-sm space-y-1">
+      <div>golden:&nbsp;&nbsp; <span class="text-[#5fc593]">${esc(r.golden_tools.join(' → ')) || '—'}</span></div>
+      <div>current:&nbsp; <span class="${r.matched ? 'text-[#5fc593]' : 'text-[#e78a8a]'}">${esc(r.current_tools.join(' → ')) || '—'}</span></div></div>`;
+    if (!r.matched) {
+      html += '<div class="mt-3 text-sm space-y-1">';
+      r.missing.forEach((m) => html += `<div class="text-[#e78a8a]">expected "${esc(m)}", never called</div>`);
+      r.unexpected.forEach((m) => html += `<div class="text-[#e78a8a]">unexpected "${esc(m)}"</div>`);
+      html += '</div>';
+    }
+    html += `<div class="mt-4 pt-3 border-t border-[#2a2f3b] text-sm">
+      <div class="text-xs text-[#858c9a] mb-1">Attribution</div>`;
+    if (at.root_cause && at.confident) {
+      html += `<div class="text-[#e0a94a]">ROOT CAUSE: ${esc(at.root_cause)}</div>`;
+    } else if (at.changed_inputs.length) {
+      html += `<div>changed inputs: ${esc(at.changed_inputs.join(', '))} — not isolated</div>`;
+    } else {
+      html += '<div class="text-[#858c9a]">No behaviour-determining input changed; any difference is model non-determinism.</div>';
+    }
+    (at.prompt_diff || []).forEach((l) => {
+      const colour = l.startsWith('+') ? 'text-[#5fc593]' : 'text-[#e78a8a]';
+      html += `<div class="mono text-xs mt-1 ${colour}">${esc(l)}</div>`;
+    });
+    html += '</div>';
+    $('#cmp-out').innerHTML = html;
+    clearFail();
+  } catch (e) { fail(e); }
+});
+
+// ---- config
+async function loadConfig() {
+  const c = await api('/api/config');
+  const box = $('#cfg-fields'); box.innerHTML = '';
+  c.editable.forEach((key) => {
+    const v = c.values[key];
+    const wrap = el('div', 'flex items-center gap-3');
+    const label = el('label', 'w-48 text-[#858c9a] text-xs mono', esc(key));
+    let input;
+    if (typeof v === 'boolean') {
+      input = el('input'); input.type = 'checkbox'; input.checked = v;
+    } else if (Array.isArray(v)) {
+      input = el('input', 'flex-1 bg-[#0e1016] border border-[#2a2f3b] rounded px-2 py-1 mono text-xs');
+      input.value = v.join(', ');
+    } else {
+      input = el('input', 'flex-1 bg-[#0e1016] border border-[#2a2f3b] rounded px-2 py-1 mono text-xs');
+      input.value = v ?? '';
+    }
+    input.dataset.key = key;
+    input.dataset.kind = typeof v === 'boolean' ? 'bool' : Array.isArray(v) ? 'list' : 'str';
+    wrap.append(label, input); box.append(wrap);
+  });
+  $('#cfg-msg').textContent = c.file ? 'current file: ' + c.file : 'no config file yet';
+}
+$('#cfg-save').addEventListener('click', async () => {
+  const payload = {};
+  $('#cfg-fields').querySelectorAll('input').forEach((i) => {
+    if (i.dataset.kind === 'bool') payload[i.dataset.key] = i.checked;
+    else if (i.dataset.kind === 'list') payload[i.dataset.key] = i.value.split(',').map((s) => s.trim()).filter(Boolean);
+    else payload[i.dataset.key] = i.value;
+  });
+  try {
+    const r = await api('/api/config', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+    $('#cfg-msg').textContent = 'saved to ' + r.written;
+    clearFail();
+  } catch (e) { fail(e); }
+});
+
+// ---- boot
+async function load(tab) {
+  try {
+    clearFail();
+    if (tab === 'dashboard') await loadDashboard();
+    if (tab === 'recordings') await loadRecordings();
+    if (tab === 'coverage') await loadCoverage();
+    if (tab === 'compare') await loadCompare();
+    if (tab === 'config') await loadConfig();
+  } catch (e) { fail(e); }
+}
+load('dashboard');
+</script>
+</body>
+</html>

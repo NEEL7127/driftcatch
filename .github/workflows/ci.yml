@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: |
+          python -m ruff check driftcatch tests examples
+          python -m ruff format --check driftcatch tests examples
+
+      - name: Type check
+        run: python -m mypy driftcatch
+
+      # Run in parallel on purpose: a tool that promises determinism must not
+      # itself leak state between concurrent tests.
+      - name: Test
+        run: python -m pytest -n 4 -q
+
+      - name: No network in the unit suite
+        run: python -m pytest tests/unit -q -p no:cacheprovider
+
+      - name: Secret scan of example recordings
+        run: python -m driftcatch.cli scan -d examples/refund_agent/recordings

@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DriftCatch">
+  <title>DriftCatch</title>
+
+  <!--
+    The avatar and social-preview variant: the same mark on the project's own
+    surface, so it holds its shape against whatever background GitHub, PyPI or
+    a social card puts behind it.
+  -->
+
+  <rect width="512" height="512" rx="112" fill="#0B0E14"/>
+
+  <!--
+    Scaled to fill the tile rather than float in it. A mark sitting small
+    inside a lot of padding reads as an afterthought at avatar size, where the
+    whole thing is 40px wide in a sidebar.
+  -->
+  <g transform="translate(55, 36) scale(1.6)">
+    <path d="M34 104 H92" stroke="#7D8590" stroke-width="20" stroke-linecap="round"/>
+    <path d="M164 104 H216" stroke="#3FB950" stroke-width="20" stroke-linecap="round"/>
+    <path d="M152 128 L206 182" stroke="#F85149" stroke-width="20" stroke-linecap="round"/>
+    <circle cx="128" cy="104" r="27" stroke="#4D9FFF" stroke-width="16"/>
+    <circle cx="216" cy="104" r="12" fill="#3FB950"/>
+    <circle cx="206" cy="182" r="12" fill="#F85149"/>
+  </g>
+</svg>

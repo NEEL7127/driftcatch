@@ -1,0 +1,41 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DriftCatch">
+  <title>DriftCatch</title>
+  <desc>A path that diverges: one route holds, the other drifts away, with the divergence point ringed.</desc>
+
+  <!--
+    The mark is the product.
+
+    A run arrives, reaches a checkpoint, and forks: the green route is the
+    behaviour you approved, the red one is where the agent went instead. The
+    ring sits on the divergence - the moment the tool exists to catch.
+
+    The asymmetry is deliberate. The approved path continues dead straight
+    because nothing about it changed; only the drift deviates. A symmetric Y
+    would read as two equal choices, which is the wrong idea.
+
+    The ring's interior is transparent rather than filled, so the mark reads
+    the same on a light README and a dark one. A filled centre looked like a
+    hole punched in white and vanished entirely against dark.
+
+    Geometry is centred on the viewBox so the mark sits true as an avatar.
+  -->
+
+  <!-- the run, arriving -->
+  <path d="M34 104 H92"
+        stroke="#7D8590" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- the approved behaviour, holding -->
+  <path d="M164 104 H216"
+        stroke="#3FB950" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- the drift -->
+  <path d="M152 128 L206 182"
+        stroke="#F85149" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- the catch -->
+  <circle cx="128" cy="104" r="27" stroke="#4D9FFF" stroke-width="16"/>
+
+  <!-- terminal nodes -->
+  <circle cx="216" cy="104" r="12" fill="#3FB950"/>
+  <circle cx="206" cy="182" r="12" fill="#F85149"/>
+</svg>
