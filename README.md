@@ -7,7 +7,8 @@
 **Learns what your AI agent always does — then tells you the moment it stops.**
 
 [![PyPI](https://img.shields.io/pypi/v/driftcatch)](https://pypi.org/project/driftcatch/)
-![python](https://img.shields.io/badge/python-3.11%2B-blue)
+[![CI](https://github.com/NEEL7127/driftcatch/actions/workflows/ci.yml/badge.svg)](https://github.com/NEEL7127/driftcatch/actions/workflows/ci.yml)
+![python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
 ![tests](https://img.shields.io/badge/tests-407%20passing-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
