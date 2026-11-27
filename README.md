@@ -6,10 +6,10 @@
 
 **Learns what your AI agent always does — then tells you the moment it stops.**
 
+[![PyPI](https://img.shields.io/pypi/v/driftcatch)](https://pypi.org/project/driftcatch/)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![tests](https://img.shields.io/badge/tests-407%20passing-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-green)
-![status](https://img.shields.io/badge/status-0.1%20pre--release-orange)
 
 <img src="assets/drift-demo.gif" width="760" alt="A passing replay, then a regression caught and its cause named.">
 

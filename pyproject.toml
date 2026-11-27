@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "driftcatch"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Catch the moment your AI agent's behaviour changes."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -72,6 +72,18 @@ driftcatch = "driftcatch.pytest_plugin"
 # wheel automatically: the UI needs no build step and no Node toolchain.
 [tool.hatch.build.targets.wheel]
 packages = ["driftcatch"]
+
+# The demo video, GIF and Remotion project are launch material, not library
+# content. Without this they ride along in every sdist - 4.3MB of MP4 that
+# nobody installing the package has any use for.
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/assets",
+    "/demo",
+    "/_testbed",
+    "/dist",
+    "/.github",
+]
 
 [tool.ruff]
 line-length = 100

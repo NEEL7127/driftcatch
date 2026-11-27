@@ -75,7 +75,7 @@ from driftcatch.suite import Suite
 from driftcatch.take import LatencyAssertion, OutputAssertion, Take, take
 from driftcatch.trajectory import TOLERANCES
 
-__version__ = "0.1.0.dev0"
+__version__ = "0.1.0"
 
 __all__ = [
     "CLI_NAME",
